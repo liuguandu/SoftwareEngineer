@@ -1,0 +1,44 @@
+#include "client.h"
+#include "ui_client.h"
+#include "chat.h"
+#include<iostream>
+using namespace std;
+Client::Client(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::Client)
+{
+    ui->setupUi(this);
+    client =new QTcpSocket;
+    connect(ui->pushButton,&QPushButton::clicked,this,&Client::on_loginButton_clicked);
+    connect(ui->cancelpushButton,&QPushButton::clicked,this,&Client::on_cancelButton_2_clicked);
+    cout<<"LL"<<endl;
+    connect(client,&QTcpSocket::connected,
+                [this]()
+        {
+            QMessageBox::information(this,"连接提示","连接成功");
+
+            this->close();
+
+            Chat *c=new Chat(client);
+            c->show();
+        });
+
+}
+
+Client::~Client()
+{
+    delete ui;
+}
+void Client::on_cancelButton_2_clicked()  //取消
+{
+    this->close();
+}
+
+
+void Client::on_loginButton_clicked()   //登陆
+{
+    QHostAddress serverAddress(ui->addressLineEdit->text());
+    quint16 serverPort=ui->portLineEdit->text().toShort();
+
+    client->connectToHost(serverAddress,serverPort);
+}
